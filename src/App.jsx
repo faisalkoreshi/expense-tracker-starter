@@ -25,6 +25,10 @@ function App() {
     setTransactions([...transactions, { ...transaction, id: Date.now() }]);
   };
 
+  const handleDeleteTransaction = (id) => {
+    setTransactions(prev => prev.filter(t => t.id !== id));
+  };
+
   return (
     <div className="app">
       <h1>Finance Tracker</h1>
@@ -39,6 +43,7 @@ function App() {
         categories={categories}
         onFilterTypeChange={(e) => setFilterType(e.target.value)}
         onFilterCategoryChange={(e) => setFilterCategory(e.target.value)}
+        onDelete={handleDeleteTransaction}
       />
     </div>
   );

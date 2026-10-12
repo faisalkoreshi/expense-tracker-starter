@@ -1,6 +1,14 @@
+import { useState } from 'react'
 import './App.css'
+import ConfirmDialog from './ConfirmDialog'
 
-function TransactionList({ transactions, filterType, filterCategory, categories, onFilterTypeChange, onFilterCategoryChange }) {
+function formatSignedAmount(t) {
+  return `${t.type === "income" ? "+" : "-"}$${t.amount}`;
+}
+
+function TransactionList({ transactions, filterType, filterCategory, categories, onFilterTypeChange, onFilterCategoryChange, onDelete }) {
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+
   let filteredTransactions = transactions;
   if (filterType !== "all") {
     filteredTransactions = filteredTransactions.filter(t => t.type === filterType);
@@ -8,6 +16,17 @@ function TransactionList({ transactions, filterType, filterCategory, categories,
   if (filterCategory !== "all") {
     filteredTransactions = filteredTransactions.filter(t => t.category === filterCategory);
   }
+
+  const pendingDelete = transactions.find(t => t.id === pendingDeleteId) || null;
+
+  const handleConfirmDelete = () => {
+    onDelete(pendingDelete.id);
+    setPendingDeleteId(null);
+  };
+
+  const handleCancelDelete = () => {
+    setPendingDeleteId(null);
+  };
 
   return (
     <div className="transactions">
@@ -33,21 +52,40 @@ function TransactionList({ transactions, filterType, filterCategory, categories,
             <th>Description</th>
             <th>Category</th>
             <th>Amount</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
+          {filteredTransactions.length === 0 && (
+            <tr>
+              <td colSpan="5">No transactions</td>
+            </tr>
+          )}
           {filteredTransactions.map(t => (
             <tr key={t.id}>
               <td>{t.date}</td>
               <td>{t.description}</td>
               <td>{t.category}</td>
               <td className={t.type === "income" ? "income-amount" : "expense-amount"}>
-                {t.type === "income" ? "+" : "-"}${t.amount}
+                {formatSignedAmount(t)}
+              </td>
+              <td>
+                <button className="delete-btn" onClick={() => setPendingDeleteId(t.id)}>Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {pendingDelete && (
+        <ConfirmDialog
+          title="Delete transaction?"
+          message={`${pendingDelete.description} (${formatSignedAmount(pendingDelete)}) will be permanently removed.`}
+          confirmLabel="Delete"
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
+      )}
     </div>
   );
 }
