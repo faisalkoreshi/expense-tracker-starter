@@ -1,10 +1,11 @@
 import './App.css'
 import { useState } from 'react'
-function TransactionForm({ onSubmit, categories }) {
+import { categories } from './data/categories.js'
+function TransactionForm({ onSubmit }) {
 	const [description, setDescription] = useState('')
 	const [amount, setAmount] = useState('')
 	const [type, setType] = useState('expense')
-	const [category, setCategory] = useState('food')
+	const [category, setCategory] = useState('')
 
 	const handleSubmit = (e) => {
 		e.preventDefault()
@@ -21,7 +22,7 @@ function TransactionForm({ onSubmit, categories }) {
 		setDescription('')
 		setAmount('')
 		setType('expense')
-		setCategory('food')
+		setCategory('')
 	}
 
 	return (
@@ -45,6 +46,7 @@ function TransactionForm({ onSubmit, categories }) {
 					<option value='expense'>Expense</option>
 				</select>
 				<select value={category} onChange={(e) => setCategory(e.target.value)}>
+					<option value=''>Uncategorized</option>
 					{categories.map((cat) => (
 						<option key={cat} value={cat}>
 							{cat}
