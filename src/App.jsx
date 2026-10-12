@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 import Summary from './Summary'
 import SpendingByCategory from './SpendingByCategory'
@@ -20,6 +20,20 @@ function App() {
 
   const [filterType, setFilterType] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('theme')
+    return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.setAttribute('data-theme', 'dark')
+      localStorage.setItem('theme', 'dark')
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light')
+      localStorage.setItem('theme', 'light')
+    }
+  }, [isDark])
 
   const handleAddTransaction = (transaction) => {
     setTransactions([...transactions, { ...transaction, id: Date.now() }]);
@@ -31,10 +45,23 @@ function App() {
 
   return (
     <div className="app">
-      <h1>Finance Tracker</h1>
-      <p className="subtitle">Track your income and expenses</p>
+      <div className="app-header">
+        <div className="header-title">
+          <h1>Finance Tracker</h1>
+          <p className="subtitle">Track your income and expenses</p>
+        </div>
+        <button
+          className="theme-toggle"
+          onClick={() => setIsDark(!isDark)}
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {isDark ? "☀️ Light" : "🌙 Dark"}
+        </button>
+      </div>
 
-      <Summary transactions={transactions} />
+      <div className="panel">
+        <Summary transactions={transactions} />
+      </div>
       <SpendingByCategory transactions={transactions} />
       <TransactionForm onSubmit={handleAddTransaction} />
       <TransactionList
